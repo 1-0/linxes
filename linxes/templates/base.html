@@ -17,18 +17,68 @@
         </title>
     </head>
     <body class=" dashboard">
-        {% block header %}
-        {% endblock %}
-        {% block content %}
+{% block header %}
             <div id="header">
                 <div id="branding">
                     <h1 id="site-name">
-                        <a href="{% url 'home' %}">
+                        <a href="{% url 'home_link' %}">
                             LinXes
                         </a>
                     </h1>
                 </div>
+                <div id="user-tools">
+                    {% if not user.is_anonymous %}
+                    Welcome,
+                    <strong>{{ user.username }}</strong>.
+                        <a href="{% url 'admin:index' %}">
+                            Admin panel
+                        </a>
+                        <a href="{% url 'admin:password_change' %}">
+                            Admin password change
+                        </a>
+                        <a href="{% url 'admin:logout' %}">
+                            Admin logout
+                        </a>
+                    {% else %}
+                        <a href="{% url 'admin:login' %}">
+                            Admin login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
         {% endblock %}
+        <div class="content">
+        {% if messages %}
+            <ul class="messagelist">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% else %} class="success"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}
+            {% if short_link %}
+                <h3>GCreated link:
+                <a href="{% url 'shorter_link' short_link %}">{{ short_link }}</a>
+                </h3>
+            {% endif %}
+            {% if form %}
+            <h3>Enter long_link for adding new long_link or enter link for checking and press Send button</h3>
+                <form action="{% url 'home_link' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="viewlink waves-effect waves-light btn" type="submit">
+    {#                    <i class="material-icons left ">save</i>#}
+                        Send
+                    </button>
+                </form>
+            {% endif %}
+            {% if links %}
+                <h5>Short link: </h5> <a href="{% url 'shorter_link' links.short_link %}">{{ links.short_link }}</a>
+                <h5>Long link: </h5>{{ links.long_link }}
+                <h5>Link redirects: </h5>{{ links.link_redirects }}
+            {% endif %}
+        {% endblock %}
+        </div>
     </body>
 </html>
 
